@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notice Period Tracker — Vivek A Nadig</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0c0c0f;
+    --surface:   #14141a;
+    --surface2:  #1c1c26;
+    --border:    #272736;
+    --text:      #ededf2;
+    --muted:     #62627a;
+    --primary:   #6366f1;
+    --success:   #22c55e;
+    --warning:   #f59e0b;
+    --danger:    #f43f5e;
+    --purple:    #a78bfa;
+    --wfh-bg:    rgba(99,102,241,0.13);
+    --wfh-bdr:   rgba(99,102,241,0.38);
+    --wfh-txt:   #a5b4fc;
+    --el-bg:     rgba(245,158,11,0.13);
+    --el-bdr:    rgba(245,158,11,0.38);
+    --el-txt:    #fcd34d;
+    --wknd-bg:   #0f0f14;
+    --wknd-txt:  #2d2d3a;
+    --today-bg:  #16a34a;
+    --today-txt: #ffffff;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    padding: 11px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-left p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-right   { text-align: right; }
+  .header-right .status  { font-size: 12px; color: var(--muted); }
+  .header-right .pct     { font-size: 15px; font-weight: 700; color: var(--primary); }
+
+  /* ── Nav bar ── */
+  .header-nav {
+    display: flex;
+    align-items: stretch;
+    padding: 0 16px;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 0;
+  }
+  .header-nav::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    margin-bottom: -1px;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+  }
+  .nav-tab.active .nav-dot { opacity: 1; }
+  .nav-tab[data-sec="sec-log"].active    { color: var(--primary); border-bottom-color: var(--primary); }
+  .nav-tab[data-sec="sec-devops"].active { color: #60a5fa;        border-bottom-color: #60a5fa; }
+  .nav-tab[data-sec="sec-kt"].active     { color: var(--purple);  border-bottom-color: var(--purple); }
+  .nav-tab[data-sec="sec-rec"].active    { color: var(--warning); border-bottom-color: var(--warning); }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* ── Sidebar (Calendar) ── */
+  .sidebar {
+    width: 340px;
+    min-width: 340px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ── Progress ── */
+  .progress-card {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  #prog-pct { color: var(--primary); }
+  .progress-track {
+    height: 7px;
+    border-radius: 99px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    transition: width 0.5s ease;
+  }
+  .progress-sub {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-pip  {
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ── Calendar month ── */
+  .cal-month { display: flex; flex-direction: column; gap: 4px; }
+  .cal-month + .cal-month { margin-top: 14px; }
+  .cal-month-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-hdr {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 3px 0;
+    letter-spacing: 0.4px;
+  }
+  .cal-cell {
+    text-align: center;
+    padding: 5px 2px;
+    border-radius: 5px;
+    font-size: 11px;
+    position: relative;
+    user-select: none;
+  }
+  .cal-cell.clickable { cursor: pointer; transition: filter 0.15s; }
+  .cal-cell.clickable:hover { filter: brightness(1.25); }
+
+  .cal-cell.outside   { color: var(--muted); opacity: 0.35; }
+  .cal-cell.weekend   { background: var(--wknd-bg); color: var(--wknd-txt); }
+  .cal-cell.wfh       { background: var(--wfh-bg); color: var(--wfh-txt); border: 1px solid var(--wfh-bdr); }
+  .cal-cell.el        { background: var(--el-bg);  color: var(--el-txt);  border: 1px solid var(--el-bdr); }
+  .cal-cell.today     { background: var(--today-bg); color: var(--today-txt); font-weight: 700; }
+  .cal-cell.selected  { outline: 2px solid var(--primary); outline-offset: 1px; }
+  /* Dev log dot (::before) and KT log dot (::after) */
+  .cal-cell.has-dev-log::before {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .cal-cell.has-kt-log::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--purple);
+  }
+  /* When both: shift dots left/right */
+  .cal-cell.has-dev-log.has-kt-log::before {
+    left: calc(50% - 5px);
+    transform: none;
+  }
+  .cal-cell.has-dev-log.has-kt-log::after {
+    left: calc(50% + 2px);
+    transform: none;
+  }
+
+  /* ── Main area ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-val   { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Section blocks ── */
+  .section-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .section-block-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── Section header ── */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sec-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .sec-meta  { font-size: 12px; color: var(--muted); }
+
+  /* ── Log editor ── */
+  .log-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .log-editor-date {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-size: 13px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.55;
+    min-height: 90px;
+  }
+  textarea:focus { outline: none; border-color: var(--primary); }
+  .log-editor-actions { display: flex; gap: 8px; }
+
+  /* ── Log entry cards ── */
+  .log-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-left-color 0.15s;
+  }
+  .log-card:hover { border-left-color: var(--success); }
+  .log-card-date { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .log-card-text { font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 15px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+  .btn:hover   { opacity: 0.85; }
+  .btn:active  { transform: scale(0.97); }
+  .btn-primary  { background: var(--primary); color: #fff; }
+  .btn-success  { background: var(--success); color: #fff; }
+  .btn-danger   { background: var(--danger);  color: #fff; }
+  .btn-ghost    { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-sm       { padding: 4px 11px; font-size: 12px; }
+
+  /* ── Add form ── */
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: none;
+  }
+  .add-form.open { display: block; }
+  .form-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-full  { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  input[type="text"],
+  input[type="url"],
+  input[type="date"],
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 100%;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--primary); }
+  select option { background: var(--surface2); }
+  .form-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* ── Table ── */
+  .ticket-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    padding: 10px 14px;
+    text-align: left;
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:hover td { background: rgba(255,255,255,0.025); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .b-blue   { background: rgba(99,102,241,0.18);  color: #a5b4fc; }
+  .b-green  { background: rgba(34,197,94,0.18);   color: #86efac; }
+  .b-yellow { background: rgba(245,158,11,0.18);  color: #fcd34d; }
+  .b-red    { background: rgba(244,63,94,0.18);   color: #fda4b2; }
+  .b-purple { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  .b-grey   { background: rgba(98,98,122,0.15);   color: #62627a; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 36px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ── Panel ── */
+  .panel { display: flex; flex-direction: column; gap: 14px; }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  /* ── Sidebar card ── */
+  .sidebar-card { background: var(--surface2); border-radius: 9px; padding: 10px 12px; }
+  .sidebar-card-title {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+
+  /* ── EL badge ── */
+  .el-badge {
+    background: var(--el-bg); border: 1px solid var(--el-bdr); color: var(--el-txt);
+    border-radius: 99px; padding: 3px 10px; font-size: 12px;
+  }
+  .el-count { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* ── Save status ── */
+  .save-status          { font-size: 11px; margin-top: 3px; min-height: 14px; }
+  .save-status.saving   { color: var(--warning); }
+  .save-status.saved    { color: var(--success); }
+  .save-status.saveerr  { color: var(--danger); }
+  .save-status.savewarn { color: var(--warning); }
+
+  /* ── Settings Modal ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:999; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px;
+    width: 480px;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .modal-title { font-size: 15px; font-weight: 700; }
+  .modal-note  { font-size: 12px; color: var(--muted); line-height: 1.65; }
+  .modal-note code { background: var(--surface2); border-radius: 3px; padding: 1px 5px; font-family: monospace; }
+  .modal-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* ── Read-only badge ── */
+  .ro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(98,98,122,0.18);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Log type tags (DEV / KT) ── */
+  .log-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  .log-tag-dev { background: rgba(99,102,241,0.2);  color: #a5b4fc; border: 1px solid rgba(99,102,241,0.38); }
+  .log-tag-kt  { background: rgba(167,139,250,0.2); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.38); }
+
+  /* ── Log editor tabs ── */
+  .log-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface2);
+    border-radius: 7px;
+    padding: 3px;
+  }
+  .log-tab-btn {
+    padding: 5px 14px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .log-tab-btn.active-dev { background: rgba(99,102,241,0.22);  color: #a5b4fc; }
+  .log-tab-btn.active-kt  { background: rgba(167,139,250,0.22); color: #c4b5fd; }
+
+  /* ── Markdown preview pane ── */
+  .md-preview {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.65;
+    min-height: 90px;
+    color: var(--text);
+    display: none;
+  }
+  .md-preview.visible { display: block; }
+  .md-preview h1 { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+  .md-preview h2 { font-size: 14px; font-weight: 700; margin: 10px 0 6px; }
+  .md-preview h3 { font-size: 13px; font-weight: 600; margin: 8px 0 4px; color: var(--muted); }
+  .md-preview p  { margin: 0 0 8px; }
+  .md-preview p:last-child { margin-bottom: 0; }
+  .md-preview ul, .md-preview ol { padding-left: 18px; margin: 0 0 8px; }
+  .md-preview li { margin-bottom: 3px; }
+  .md-preview code { background: rgba(255,255,255,0.09); border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: 12px; }
+  .md-preview pre  { background: rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 12px; overflow-x: auto; margin: 0 0 8px; }
+  .md-preview pre code { background: none; padding: 0; }
+  .md-preview strong { color: #fff; }
+  .md-preview em     { color: #c4b5fd; font-style: italic; }
+  .md-preview hr     { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  .md-preview a      { color: var(--primary); }
+  .md-preview blockquote { border-left: 3px solid var(--border); padding: 2px 0 2px 12px; color: var(--muted); margin: 6px 0; }
+  .md-preview .md-section + .md-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+  /* ── Log card markdown body ── */
+  .log-card-md h1 { font-size: 13px; font-weight: 700; margin: 2px 0 4px; }
+  .log-card-md h2 { font-size: 13px; font-weight: 600; margin: 4px 0 3px; }
+  .log-card-md h3 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 3px 0; }
+  .log-card-md p  { margin: 0 0 5px; }
+  .log-card-md p:last-child { margin-bottom: 0; }
+  .log-card-md ul, .log-card-md ol { padding-left: 16px; margin: 0 0 5px; }
+  .log-card-md li { margin-bottom: 2px; }
+  .log-card-md code { background: rgba(255,255,255,0.09); border-radius: 3px; padding: 1px 4px; font-family: monospace; font-size: 11px; }
+  .log-card-md pre  { background: rgba(255,255,255,0.06); border-radius: 5px; padding: 6px 10px; overflow-x: auto; margin: 4px 0; }
+  .log-card-md pre code { background: none; padding: 0; }
+  .log-card-md strong { color: #fff; }
+  .log-card-md em     { font-style: italic; }
+  .log-card-md a      { color: var(--primary); }
+  .log-card-md blockquote { border-left: 2px solid var(--border); padding-left: 8px; color: var(--muted); margin: 4px 0; }
+
+  /* ── Recordings sub-section ── */
+  .sub-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--muted);
+    padding: 12px 0 8px;
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+  }
+
+  /* Recording cards */
+  .rec-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rec-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warning);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .rec-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(245,158,11,0.14);
+    border: 1px solid rgba(245,158,11,0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: var(--warning);
+    margin-top: 1px;
+  }
+  .rec-card-body    { flex: 1; min-width: 0; }
+  .rec-card-title   { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .rec-card-title a { color: var(--text); }
+  .rec-card-title a:hover { color: var(--warning); text-decoration: none; }
+  .rec-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .rec-card-notes   { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .rec-card-foot    { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+  .btn-watch {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    border-radius: 6px;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--warning);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .btn-watch:hover { background: rgba(245,158,11,0.26); text-decoration: none; color: var(--warning); }
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="header">
+  <div class="header-top">
+    <div class="header-left">
+      <h1>Notice Period Tracker</h1>
+      <p>Vivek A Nadig &nbsp;·&nbsp; 27 Jul – 25 Sep 2026 &nbsp;·&nbsp; 60 days</p>
+    </div>
+    <div class="header-right" style="display:flex;align-items:center;gap:16px;">
+      <div style="text-align:right;">
+        <div class="status" id="hdr-status"></div>
+        <div class="pct"    id="hdr-pct"></div>
+        <div class="save-status" id="save-status"></div>
+      </div>
+      <span class="ro-badge" id="ro-badge" style="display:none;">&#128065; Read-only</span>
+      <button class="btn btn-ghost btn-sm edit-only" onclick="openSettings()" title="GitHub sync settings">⚙ Settings</button>
+    </div>
+  </div>
+  <div class="header-nav">
+    <button class="nav-tab active" data-sec="sec-log" onclick="navTo('sec-log')">
+      <span class="nav-dot" style="background:var(--primary);"></span> Daily Log
+    </button>
+    <button class="nav-tab" data-sec="sec-devops" onclick="navTo('sec-devops')">
+      <span class="nav-dot" style="background:#60a5fa;"></span> DevOps
+    </button>
+    <button class="nav-tab" data-sec="sec-kt" onclick="navTo('sec-kt')">
+      <span class="nav-dot" style="background:var(--purple);"></span> Knowledge Transfer
+    </button>
+    <button class="nav-tab" data-sec="sec-rec" onclick="navTo('sec-rec')">
+      <span class="nav-dot" style="background:var(--warning);"></span> &#9654; Recordings
+    </button>
+  </div>
+</header>
+
+<!-- ════ LAYOUT ════ -->
+<div class="layout">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="progress-labels">
+        <span>Progress</span>
+        <span id="prog-pct"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-sub">
+        <span>27 Jul</span>
+        <span id="prog-mid"></span>
+        <span>25 Sep</span>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--wfh-bg);border:1px solid var(--wfh-bdr);"></div>
+        WFH (Mon / Fri)
+      </div>
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--el-bg);border:1px solid var(--el-bdr);"></div>
+        Earned Leave
+      </div>
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--today-bg);"></div>
+        Today
+      </div>
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--wknd-bg);border:1px solid var(--border);"></div>
+        Weekend
+      </div>
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--primary);width:8px;height:8px;border-radius:50%;margin-left:2px;"></div>
+        Dev log
+      </div>
+      <div class="legend-item">
+        <div class="legend-pip" style="background:var(--purple);width:8px;height:8px;border-radius:50%;margin-left:2px;"></div>
+        KT log
+      </div>
+    </div>
+
+    <!-- EL display (hardcoded in JS) -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Earned Leave Days</div>
+      <div id="el-display"></div>
+    </div>
+
+    <!-- Calendars -->
+    <div id="calendars"></div>
+
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--primary);" id="s-done">0</div>
+        <div class="stat-label">Days Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--warning);" id="s-left">0</div>
+        <div class="stat-label">Days Left</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--success);" id="s-logs">0</div>
+        <div class="stat-label">Daily Logs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--purple);" id="s-tickets">0</div>
+        <div class="stat-label">Tickets Tracked</div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: Daily Log ── -->
+    <div class="section-block" id="sec-log">
+      <div class="section-block-title">Daily Log</div>
+      <div id="panel-log" class="panel">
+
+        <div class="log-editor" id="log-editor">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div class="log-editor-date" id="log-editor-date">← Select a date from the calendar to view the log</div>
+            <div class="log-tabs" id="log-tabs" style="display:none;">
+              <button class="log-tab-btn active-dev" id="tab-dev" onclick="switchLogTab('dev')">
+                <span class="log-tag log-tag-dev">DEV</span> Dev Work
+              </button>
+              <button class="log-tab-btn" id="tab-kt" onclick="switchLogTab('kt')">
+                <span class="log-tag log-tag-kt">KT</span> KT
+              </button>
+            </div>
+          </div>
+          <textarea id="log-ta" placeholder="Describe your dev work today — tasks, PRs, blockers, progress..." rows="5" disabled></textarea>
+          <div class="md-preview" id="log-preview"></div>
+          <div class="log-editor-actions edit-only" id="log-editor-actions" style="display:none;">
+            <button class="btn btn-primary" onclick="saveLog()">Save</button>
+            <button class="btn btn-ghost btn-sm" id="log-preview-btn" onclick="toggleLogPreview()">👁 Preview</button>
+            <button class="btn btn-danger"  onclick="deleteLog()" id="log-del-btn" style="display:none;">Delete</button>
+            <button class="btn btn-ghost"   onclick="clearLogEditor()">Cancel</button>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="sec-header">
+          <div class="sec-title">All Logs</div>
+          <div class="sec-meta" id="log-count-label"></div>
+        </div>
+
+        <div id="log-list"></div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION: DevOps Work Items ── -->
+    <div class="section-block" id="sec-devops" style="display:none;">
+      <div class="section-block-title">
+        Azure DevOps Work Items
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="ado-conn-status" style="font-size:11px;"></span>
+          <button class="btn btn-ghost btn-sm edit-only" onclick="toggleADOConfig()" title="Configure Azure DevOps connection">⚙ Connect</button>
+          <button class="btn btn-primary btn-sm edit-only" onclick="toggleForm('devops-form')">+ Add</button>
+        </div>
+      </div>
+      <div id="panel-devops" class="panel">
+
+        <!-- ADO connection config (collapsible) -->
+        <div class="add-form" id="ado-config-panel">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Azure DevOps Connection</div>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="form-group">
+              <label class="form-label">Organization</label>
+              <input type="text" id="ado-org" placeholder="FlatworldAi">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project</label>
+              <input type="text" id="ado-project" placeholder="FAIA">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Personal Access Token &mdash; scope: Work Items → Read</label>
+              <input type="password" id="ado-pat" placeholder="Azure DevOps PAT" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveADOSettings()">Save Connection</button>
+            <button class="btn btn-ghost" onclick="toggleADOConfig()">Close</button>
+            <button class="btn btn-danger btn-sm" onclick="clearADOSettings()" style="margin-left:auto;">Clear</button>
+          </div>
+          <div id="ado-settings-status" style="font-size:12px;min-height:16px;"></div>
+        </div>
+
+        <!-- Add form -->
+        <div class="add-form" id="devops-form">
+          <!-- Import row -->
+          <div class="form-group form-full" style="margin-bottom:4px;">
+            <label class="form-label">Import from Azure DevOps</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="number" id="d-import-id" placeholder="Work item number (e.g. 1234)" style="flex:1;" min="1">
+              <button class="btn btn-primary btn-sm" onclick="fetchDevopsItem()" type="button">Fetch</button>
+            </div>
+            <div id="d-fetch-status" style="font-size:11px;min-height:15px;margin-top:4px;"></div>
+          </div>
+          <hr class="divider" style="margin:8px 0 10px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Ticket ID *</label>
+              <input type="text" id="d-id" placeholder="AB#1234">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Title *</label>
+              <input type="text" id="d-title" placeholder="Work item title">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Azure DevOps URL</label>
+              <input type="url" id="d-url" placeholder="https://dev.azure.com/org/project/_workitems/edit/1234">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <select id="d-type">
+                <option>Task</option>
+                <option>Bug</option>
+                <option>User Story</option>
+                <option>Feature</option>
+                <option>Epic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="d-status">
+                <option>In Progress</option>
+                <option>Done</option>
+                <option>To Do</option>
+                <option>In Review</option>
+                <option>Blocked</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="d-date">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Notes</label>
+              <textarea id="d-notes" placeholder="What was done on this ticket?" rows="2" style="min-height:60px;"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addDevops()">Add</button>
+            <button class="btn btn-ghost"   onclick="toggleForm('devops-form')">Cancel</button>
+          </div>
+        </div>
+
+        <div id="devops-list"></div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION: KT Tickets ── -->
+    <div class="section-block" id="sec-kt" style="display:none;">
+      <div class="section-block-title">
+        Knowledge Transfer
+        <button class="btn btn-primary btn-sm edit-only" onclick="toggleForm('kt-form')">+ Add KT</button>
+      </div>
+      <div id="panel-kt" class="panel">
+
+        <!-- KT add form -->
+        <div class="add-form" id="kt-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Ticket ID *</label>
+              <input type="text" id="k-id" placeholder="KT#001 or AB#5678">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Title *</label>
+              <input type="text" id="k-title" placeholder="Module / topic title">
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL / Link</label>
+              <input type="url" id="k-url" placeholder="https://dev.azure.com/...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="k-status">
+                <option>Pending</option>
+                <option>In Progress</option>
+                <option>Completed</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Description / Notes</label>
+              <textarea id="k-desc" placeholder="What does this KT cover? Who was it handed over to?" rows="3" style="min-height:70px;"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addKT()">Add KT</button>
+            <button class="btn btn-ghost"   onclick="toggleForm('kt-form')">Cancel</button>
+          </div>
+        </div>
+
+        <div id="kt-list"></div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION: Recordings ── -->
+    <div class="section-block" id="sec-rec" style="display:none;">
+      <div class="section-block-title">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span style="color:var(--warning);">&#9654;</span> Recordings
+        </span>
+        <button class="btn btn-ghost btn-sm edit-only" onclick="openRecForm()">+ Add Recording</button>
+      </div>
+      <div class="panel">
+
+        <!-- Recording add form -->
+        <div class="add-form" id="rec-form">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-label">Recording Title *</label>
+              <input type="text" id="r-title" placeholder="e.g. Module 1: API Integration KT Session">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recording URL *</label>
+              <input type="url" id="r-url" placeholder="https://meet.google.com/... or Drive link">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Linked KT Ticket</label>
+              <select id="r-ktid">
+                <option value="">— None —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="r-date">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Notes</label>
+              <textarea id="r-notes" placeholder="Topics covered, attendees, follow-ups..." rows="2" style="min-height:60px;"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addRecording()">Add Recording</button>
+            <button class="btn btn-ghost"   onclick="toggleForm('rec-form')">Cancel</button>
+          </div>
+        </div>
+
+        <div id="kt-recordings"></div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════ SCRIPT ════ -->
+<script>
+'use strict';
+
+// ── Constants ──
+const START = new Date(2026, 6, 27);  // July 27 2026
+const END   = new Date(2026, 8, 25);  // Sep  25 2026
+const KEY   = 'np_tracker_v2';
+
+// ── Edit mode: tracker.html?edit ──
+// Without ?edit the page is fully read-only (safe to share with managers/HR).
+// Saving still requires a GitHub PAT configured via Settings.
+const EDIT_MODE = new URLSearchParams(location.search).has('edit');
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+// ── Hardcoded EL days — add your dates here as "YYYY-MM-DD" strings ──
+const EL_DAYS = [
+  // e.g. '2026-08-15',
+];
+
+// ── State ──
+let S = {
+  dailyLogs:    {},   // { "YYYY-MM-DD": { dev, kt } }  (old string format auto-migrated)
+  devopsItems:  [],   // [{ _k, id, title, url, type, status, date, notes }]
+  ktItems:      [],   // [{ _k, id, title, url, status, desc }]
+  ktRecordings: [],   // [{ _k, title, url, ktId, date, notes }]
+  selectedDate: null,
+};
+
+// ── Log editor state ──
+let _logTab         = 'dev';             // 'dev' | 'kt'
+let _logDraft       = { dev: '', kt: '' };
+let _logPreviewMode = false;
+
+// ── GitHub config (stored in localStorage, never in repo) ──
+const GH_KEY = 'np_gh_config';
+function getGHConfig() {
+  try { const d = localStorage.getItem(GH_KEY); return d ? JSON.parse(d) : null; } catch(_) { return null; }
+}
+
+// ── Save status indicator ──
+let _saveTimer = null;
+function showSaveStatus(type, msg) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.className = 'save-status ' + type;
+  clearTimeout(_saveTimer);
+  if (type === 'saved') _saveTimer = setTimeout(() => { el.textContent = ''; el.className = 'save-status'; }, 3000);
+}
+
+// ── Persist ──
+async function load() {
+  try {
+    // Fetch from repo (works on GitHub Pages; bust cache)
+    const res = await fetch('./data/tracker-data.json?t=' + Date.now());
+    if (res.ok) { const d = await res.json(); S = { ...S, ...d }; return; }
+  } catch(_) {}
+  // Fallback: localStorage (local dev / first run)
+  try { const d = localStorage.getItem(KEY); if (d) S = { ...S, ...JSON.parse(d) }; } catch(_) {}
+}
+
+async function save() {
+  const cfg = getGHConfig();
+  if (!cfg || !cfg.owner || !cfg.repo || !cfg.pat) {
+    localStorage.setItem(KEY, JSON.stringify(S));
+    showSaveStatus('savewarn', 'Saved locally — configure GitHub sync in Settings');
+    return;
+  }
+
+  showSaveStatus('saving', 'Saving to GitHub…');
+  const { selectedDate, ...dataToSave } = S;  // don't persist UI state
+  const path   = 'data/tracker-data.json';
+  const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+  const headers = {
+    'Authorization': `token ${cfg.pat}`,
+    'Accept':        'application/vnd.github.v3+json',
+    'Content-Type':  'application/json'
+  };
+
+  try {
+    // Get current file SHA (required for updates)
+    let sha = null;
+    const getRes = await fetch(apiUrl, { headers });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2))));
+    const putRes  = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: `tracker: update ${new Date().toISOString().slice(0, 10)}`,
+        content,
+        ...(sha ? { sha } : {})
+      })
+    });
+
+    if (putRes.ok) {
+      showSaveStatus('saved', 'Saved to GitHub ✓');
+    } else {
+      const err = await putRes.json().catch(() => ({}));
+      showSaveStatus('saveerr', `Save failed: ${err.message || putRes.status}`);
+    }
+  } catch(e) {
+    showSaveStatus('saveerr', `Save error: ${e.message}`);
+  }
+}
+
+// ── Date helpers ──
+function dk(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+function todayDate() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function todayKey() { return dk(todayDate()); }
+function fromDK(key) { const [y,m,d] = key.split('-').map(Number); return new Date(y, m-1, d); }
+function isInNotice(date) { return date >= START && date <= END; }
+function isWeekend(date)  { const d = date.getDay(); return d === 0 || d === 6; }
+function isWFH(date)      { const d = date.getDay(); return d === 1 || d === 5; }  // Mon=1, Fri=5
+function isToday(date)    { return dk(date) === todayKey(); }
+function isEL(date)       { return EL_DAYS.includes(dk(date)); }
+
+function fmtFull(key) {
+  const d = fromDK(key);
+  return d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+function fmtShort(key) {
+  const d = fromDK(key);
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ── Progress ──
+function progress() {
+  const t  = todayDate();
+  const total = END - START;
+  const done  = Math.min(Math.max(t - START, 0), total);
+  const pct   = Math.round((done / total) * 100);
+  const totalDays = Math.round(total / 864e5) + 1;
+  const daysDone  = Math.max(0, Math.round((t - START) / 864e5));
+  const daysLeft  = Math.max(0, totalDays - daysDone);
+  return { pct: Math.min(pct, 100), daysDone, daysLeft, totalDays };
+}
+
+// ── Calendar ──
+function renderCalendars() {
+  const wrap = document.getElementById('calendars');
+  wrap.innerHTML = '';
+  [[2026,6],[2026,7],[2026,8]].forEach(([y,m]) => {
+    wrap.appendChild(buildMonth(y, m));
+  });
+}
+
+function buildMonth(year, month) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cal-month';
+
+  const title = document.createElement('div');
+  title.className = 'cal-month-title';
+  title.textContent = `${MONTHS[month]} ${year}`;
+  wrap.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'cal-grid';
+
+  DAYS.forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'cal-hdr';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  for (let i = 0; i < firstDow; i++) {
+    const e = document.createElement('div');
+    e.className = 'cal-cell';
+    grid.appendChild(e);
+  }
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const key  = dk(date);
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    cell.textContent = d;
+
+    const inN     = isInNotice(date);
+    const todayF  = isToday(date);
+    const wkndF   = isWeekend(date);
+    const elF     = isEL(date) && inN && !wkndF;
+    const wfhF    = isWFH(date) && inN && !wkndF && !elF;
+    const hasLog  = !!S.dailyLogs[key];
+    const logEntry  = getLogEntry(key);
+    const hasDevLog = !!logEntry.dev;
+    const hasKtLog  = !!logEntry.kt;
+    const selF    = S.selectedDate === key;
+
+    if (!inN) {
+      cell.classList.add('outside');
+    } else {
+      cell.classList.add('clickable');
+      if      (todayF) cell.classList.add('today');
+      else if (elF)    cell.classList.add('el');
+      else if (wkndF)  cell.classList.add('weekend');
+      else if (wfhF)   cell.classList.add('wfh');
+
+      if (selF)      cell.classList.add('selected');
+      if (hasDevLog) cell.classList.add('has-dev-log');
+      if (hasKtLog)  cell.classList.add('has-kt-log');
+      // legacy (unused, kept for safety)
+      if (hasLog && !hasDevLog && !hasKtLog) cell.classList.add('has-dev-log');
+
+      const parts = [fmtFull(key)];
+      if (wfhF)  parts.push('WFH');
+      if (elF)   parts.push('Earned Leave');
+      if (wkndF) parts.push('Weekend');
+      cell.title = parts.join(' · ');
+      cell.onclick = () => selectDate(key);
+    }
+
+    grid.appendChild(cell);
+  }
+
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+// ── Markdown renderer ──
+function markdownToHtml(md) {
+  if (!md) return '';
+  function escH(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function inline(s) {
+    s = escH(s);
+    s = s.replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`);
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    s = s.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      (_, t, u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${t}</a>`);
+    return s;
+  }
+  const lines = md.split('\n');
+  const out = [];
+  let inList = false, listType = '', inPre = false;
+  const flushList = () => { if (inList) { out.push(`</${listType}>`); inList = false; listType = ''; } };
+  for (const line of lines) {
+    if (/^```/.test(line)) {
+      if (!inPre) { flushList(); out.push('<pre><code>'); inPre = true; }
+      else        { out.push('</code></pre>');            inPre = false; }
+      continue;
+    }
+    if (inPre)  { out.push(escH(line)); continue; }
+    if (/^-{3,}$/.test(line.trim())) { flushList(); out.push('<hr>'); continue; }
+    const hm = line.match(/^(#{1,3}) (.+)/);
+    if (hm) { flushList(); out.push(`<h${hm[1].length}>${inline(hm[2])}</h${hm[1].length}>`); continue; }
+    if (line.startsWith('> ')) { flushList(); out.push(`<blockquote>${inline(line.slice(2))}</blockquote>`); continue; }
+    const ulm = line.match(/^[*-] (.+)/);
+    if (ulm) {
+      if (!inList || listType !== 'ul') { flushList(); out.push('<ul>'); inList = true; listType = 'ul'; }
+      out.push(`<li>${inline(ulm[1])}</li>`); continue;
+    }
+    const olm = line.match(/^\d+\. (.+)/);
+    if (olm) {
+      if (!inList || listType !== 'ol') { flushList(); out.push('<ol>'); inList = true; listType = 'ol'; }
+      out.push(`<li>${inline(olm[1])}</li>`); continue;
+    }
+    flushList();
+    if (!line.trim()) { out.push('<br>'); continue; }
+    out.push(`<p>${inline(line)}</p>`);
+  }
+  flushList();
+  if (inPre) out.push('</code></pre>');
+  return out.join('');
+}
+
+// ── Log entry helpers ──
+function getLogEntry(key) {
+  const v = S.dailyLogs[key];
+  if (!v) return { dev: '', kt: '' };
+  if (typeof v === 'string') return { dev: v, kt: '' };  // backward compat
+  return { dev: v.dev || '', kt: v.kt || '' };
+}
+function hasLogContent(key) {
+  const e = getLogEntry(key);
+  return !!(e.dev || e.kt);
+}
+
+function buildReadonlyView(entry) {
+  let html = '';
+  if (entry.dev) {
+    html += `<div class="md-section">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+        <span class="log-tag log-tag-dev">DEV</span>
+        <span style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Dev Work</span>
+      </div>
+      <div class="log-card-md">${markdownToHtml(entry.dev)}</div>
+    </div>`;
+  }
+  if (entry.kt) {
+    html += `<div class="md-section">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+        <span class="log-tag log-tag-kt">KT</span>
+        <span style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Knowledge Transfer</span>
+      </div>
+      <div class="log-card-md">${markdownToHtml(entry.kt)}</div>
+    </div>`;
+  }
+  return html;
+}
+
+// ── Log tab switcher ──
+function switchLogTab(tab) {
+  // Capture current textarea draft before switching
+  _logDraft[_logTab] = document.getElementById('log-ta').value;
+  // Exit preview if active
+  if (_logPreviewMode) {
+    _logPreviewMode = false;
+    document.getElementById('log-preview').classList.remove('visible');
+    document.getElementById('log-ta').style.display = '';
+    document.getElementById('log-preview-btn').textContent = '\uD83D\uDC41 Preview';
+  }
+  _logTab = tab;
+  document.getElementById('tab-dev').className = 'log-tab-btn' + (tab === 'dev' ? ' active-dev' : '');
+  document.getElementById('tab-kt').className  = 'log-tab-btn' + (tab === 'kt'  ? ' active-kt'  : '');
+  const ta = document.getElementById('log-ta');
+  ta.value = _logDraft[tab];
+  ta.placeholder = tab === 'dev'
+    ? 'Describe your dev work today \u2014 tasks, PRs, blockers, progress...'
+    : 'Describe KT sessions \u2014 what was covered, who attended, recording link...';
+  const del = document.getElementById('log-del-btn');
+  if (del) del.style.display = _logDraft[tab] ? 'inline-flex' : 'none';
+  ta.focus();
+}
+
+// ── Log markdown preview toggle ──
+function toggleLogPreview() {
+  const ta      = document.getElementById('log-ta');
+  const preview = document.getElementById('log-preview');
+  const btn     = document.getElementById('log-preview-btn');
+  _logPreviewMode = !_logPreviewMode;
+  if (_logPreviewMode) {
+    _logDraft[_logTab] = ta.value;
+    preview.innerHTML = markdownToHtml(_logDraft[_logTab]) ||
+      '<p style="color:var(--muted);font-style:italic;">Nothing to preview — start typing in the editor.</p>';
+    preview.classList.add('visible');
+    ta.style.display = 'none';
+    btn.textContent = '\u270F Edit';
+  } else {
+    preview.classList.remove('visible');
+    ta.style.display = '';
+    btn.textContent = '\uD83D\uDC41 Preview';
+    ta.focus();
+  }
+}
+
+// ── Select Date ──
+function selectDate(key) {
+  S.selectedDate = key;
+  renderCalendars();
+
+  const lbl     = document.getElementById('log-editor-date');
+  const ta      = document.getElementById('log-ta');
+  const act     = document.getElementById('log-editor-actions');
+  const del     = document.getElementById('log-del-btn');
+  const tabs    = document.getElementById('log-tabs');
+  const preview = document.getElementById('log-preview');
+
+  lbl.textContent = fmtFull(key);
+
+  const entry = getLogEntry(key);
+  _logDraft = { dev: entry.dev, kt: entry.kt };
+  _logTab   = 'dev';
+  _logPreviewMode = false;
+
+  // Reset tab buttons
+  document.getElementById('tab-dev').className = 'log-tab-btn active-dev';
+  document.getElementById('tab-kt').className  = 'log-tab-btn';
+
+  // Reset preview state
+  preview.classList.remove('visible');
+  preview.innerHTML = '';
+  ta.style.display  = '';
+
+  if (EDIT_MODE) {
+    tabs.style.display  = 'flex';
+    ta.value            = _logDraft.dev;
+    ta.placeholder      = 'Describe your dev work today \u2014 tasks, PRs, blockers, progress...';
+    ta.disabled         = false;
+    act.style.display   = 'flex';
+    del.style.display   = (_logDraft.dev || _logDraft.kt) ? 'inline-flex' : 'none';
+    document.getElementById('log-preview-btn').textContent = '\uD83D\uDC41 Preview';
+    ta.focus();
+  } else {
+    // Read-only: render both sections as markdown
+    tabs.style.display = 'none';
+    ta.style.display   = 'none';
+    ta.disabled        = true;
+    act.style.display  = 'none';
+    if (entry.dev || entry.kt) {
+      preview.innerHTML = buildReadonlyView(entry);
+    } else {
+      preview.innerHTML = '<p style="color:var(--muted);font-style:italic;">(No log entry for this day)</p>';
+    }
+    preview.classList.add('visible');
+  }
+}
+
+function clearLogEditor() {
+  S.selectedDate  = null;
+  _logDraft       = { dev: '', kt: '' };
+  _logTab         = 'dev';
+  _logPreviewMode = false;
+
+  const lbl     = document.getElementById('log-editor-date');
+  const ta      = document.getElementById('log-ta');
+  const act     = document.getElementById('log-editor-actions');
+  const tabs    = document.getElementById('log-tabs');
+  const preview = document.getElementById('log-preview');
+
+  lbl.textContent  = '\u2190 Select a date from the calendar to add your log';
+  ta.value         = '';
+  ta.disabled      = true;
+  ta.style.display = '';
+  act.style.display  = 'none';
+  tabs.style.display = 'none';
+  preview.classList.remove('visible');
+  preview.innerHTML  = '';
+  renderCalendars();
+}
+
+// ── Daily Log ──
+function saveLog() {
+  if (!S.selectedDate) return;
+  // Capture current textarea into draft before saving
+  _logDraft[_logTab] = document.getElementById('log-ta').value.trim();
+  const dev = _logDraft.dev.trim();
+  const kt  = _logDraft.kt.trim();
+  if (dev || kt) {
+    S.dailyLogs[S.selectedDate] = { dev, kt };
+  } else {
+    delete S.dailyLogs[S.selectedDate];
+  }
+  save();
+  renderAll();
+  selectDate(S.selectedDate);
+}
+
+function deleteLog() {
+  if (!S.selectedDate) return;
+  const entry    = getLogEntry(S.selectedDate);
+  const tabLabel = _logTab === 'dev' ? 'Dev Work' : 'KT';
+  if (!entry[_logTab]) return;
+  if (!confirm(`Delete the ${tabLabel} log for this day?`)) return;
+  _logDraft[_logTab] = '';
+  entry[_logTab]     = '';
+  if (!entry.dev && !entry.kt) {
+    delete S.dailyLogs[S.selectedDate];
+  } else {
+    S.dailyLogs[S.selectedDate] = { dev: entry.dev, kt: entry.kt };
+  }
+  save();
+  renderAll();
+  selectDate(S.selectedDate);
+}
+
+function renderLogs() {
+  const list = document.getElementById('log-list');
+  const lbl  = document.getElementById('log-count-label');
+  const entries = Object.entries(S.dailyLogs).sort((a,b) => b[0].localeCompare(a[0]));
+  lbl.textContent = `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}`;
+  document.getElementById('s-logs').textContent = entries.length;
+
+  if (entries.length === 0) {
+    list.innerHTML = `<div class="empty-state">No logs yet \u2014 pick a day from the calendar.</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(([key, rawVal]) => {
+    const entry = (rawVal && typeof rawVal === 'object') ? rawVal : { dev: rawVal || '', kt: '' };
+    const tags = [];
+    if (entry.dev) tags.push(`<span class="log-tag log-tag-dev">DEV</span>`);
+    if (entry.kt)  tags.push(`<span class="log-tag log-tag-kt">KT</span>`);
+    let content = '';
+    if (entry.dev) {
+      content += `<div class="log-card-md">${markdownToHtml(entry.dev)}</div>`;
+    }
+    if (entry.dev && entry.kt) {
+      content += `<hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">`;
+    }
+    if (entry.kt) {
+      content += `<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+        <span class="log-tag log-tag-kt" style="font-size:9px;">KT</span>
+      </div><div class="log-card-md">${markdownToHtml(entry.kt)}</div>`;
+    }
+    return `
+      <div class="log-card" onclick="selectDate('${key}')">
+        <div class="log-card-date" style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
+          <span>${fmtFull(key)}</span>
+          <span style="flex:1;"></span>
+          ${tags.join('')}
+        </div>
+        ${content}
+      </div>
+    `;
+  }).join('');
+}
+
+// ── EL display ──
+function renderEL() {
+  const wrap = document.getElementById('el-display');
+  if (EL_DAYS.length === 0) {
+    wrap.innerHTML = '<span style="font-size:12px;color:var(--muted);">No EL days configured</span>';
+    return;
+  }
+  wrap.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+      ${EL_DAYS.map(key => `<span class="el-badge">${fmtShort(key)}</span>`).join('')}
+    </div>
+    <div class="el-count">${EL_DAYS.length} / 10 EL days</div>
+  `;
+}
+
+// ── DevOps ──
+function toggleForm(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function addDevops() {
+  const id    = document.getElementById('d-id').value.trim();
+  const title = document.getElementById('d-title').value.trim();
+  if (!id || !title) { alert('Ticket ID and Title are required.'); return; }
+
+  S.devopsItems.push({
+    _k:     Date.now(),
+    id, title,
+    url:    document.getElementById('d-url').value.trim(),
+    type:   document.getElementById('d-type').value,
+    status: document.getElementById('d-status').value,
+    date:   document.getElementById('d-date').value,
+    notes:  document.getElementById('d-notes').value.trim(),
+  });
+  save();
+  ['d-id','d-title','d-url','d-notes'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('d-date').value = todayKey();
+  toggleForm('devops-form');
+  renderDevops();
+}
+
+function deleteDevops(k) {
+  if (!confirm('Remove this work item?')) return;
+  S.devopsItems = S.devopsItems.filter(t => t._k !== k);
+  save(); renderDevops(); updateTicketStat();
+}
+
+function renderDevops() {
+  const wrap = document.getElementById('devops-list');
+  updateTicketStat();
+  if (S.devopsItems.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">No work items added yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="ticket-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Title</th><th>Type</th><th>Status</th><th>Date</th><th>Notes</th>${EDIT_MODE ? '<th></th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${S.devopsItems.map(t => `
+            <tr>
+              <td>${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">${esc(t.id)}</a>` : esc(t.id)}</td>
+              <td>${esc(t.title)}</td>
+              <td>${typeBadge(t.type)}</td>
+              <td>${statusBadge(t.status)}</td>
+              <td style="white-space:nowrap;">${t.date ? fmtShort(t.date) : '—'}</td>
+              <td style="color:var(--muted);font-size:12px;max-width:200px;">${esc(t.notes || '—')}</td>
+              ${EDIT_MODE ? `<td><button class="btn btn-danger btn-sm" onclick="deleteDevops(${t._k})">×</button></td>` : ''}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── KT ──
+function addKT() {
+  const id    = document.getElementById('k-id').value.trim();
+  const title = document.getElementById('k-title').value.trim();
+  if (!id || !title) { alert('Ticket ID and Title are required.'); return; }
+
+  S.ktItems.push({
+    _k:     Date.now(),
+    id, title,
+    url:    document.getElementById('k-url').value.trim(),
+    status: document.getElementById('k-status').value,
+    desc:   document.getElementById('k-desc').value.trim(),
+  });
+  save();
+  ['k-id','k-title','k-url','k-desc'].forEach(i => document.getElementById(i).value = '');
+  toggleForm('kt-form');
+  renderKT();
+}
+
+function deleteKT(k) {
+  if (!confirm('Remove this KT ticket?')) return;
+  S.ktItems = S.ktItems.filter(t => t._k !== k);
+  save(); renderKT(); updateTicketStat();
+}
+
+function renderKT() {
+  const wrap = document.getElementById('kt-list');
+  updateTicketStat();
+  if (S.ktItems.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">No KT items added yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="ticket-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Title / Link</th><th>Status</th><th>Description</th>${EDIT_MODE ? '<th></th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${S.ktItems.map(t => `
+            <tr>
+              <td style="white-space:nowrap;">${esc(t.id)}</td>
+              <td>
+                ${t.url
+                  ? `<a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">${esc(t.title)}</a>`
+                  : esc(t.title)}
+              </td>
+              <td>${ktStatusBadge(t.status)}</td>
+              <td style="color:var(--muted);font-size:12px;max-width:260px;">${esc(t.desc || '\u2014')}</td>
+              ${EDIT_MODE ? `<td><button class="btn btn-danger btn-sm" onclick="deleteKT(${t._k})">&times;</button></td>` : ''}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── KT Recordings ──
+function openRecForm() {
+  // Populate KT ticket dropdown
+  const sel = document.getElementById('r-ktid');
+  sel.innerHTML = '<option value="">— None —</option>' +
+    (S.ktItems || []).map(t =>
+      `<option value="${t._k}">${esc(t.id)} — ${esc(t.title)}</option>`
+    ).join('');
+  document.getElementById('r-date').value = todayKey();
+  toggleForm('rec-form');
+}
+
+function addRecording() {
+  const title = document.getElementById('r-title').value.trim();
+  const url   = document.getElementById('r-url').value.trim();
+  if (!title || !url) { alert('Title and Recording URL are required.'); return; }
+
+  if (!S.ktRecordings) S.ktRecordings = [];
+  S.ktRecordings.push({
+    _k:    Date.now(),
+    title, url,
+    ktId:  document.getElementById('r-ktid').value || '',
+    date:  document.getElementById('r-date').value || '',
+    notes: document.getElementById('r-notes').value.trim(),
+  });
+  save();
+  ['r-title','r-url','r-notes'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('r-ktid').value = '';
+  toggleForm('rec-form');
+  renderKTRecordings();
+}
+
+function deleteRecording(k) {
+  if (!confirm('Remove this recording?')) return;
+  S.ktRecordings = (S.ktRecordings || []).filter(r => r._k !== k);
+  save();
+  renderKTRecordings();
+}
+
+function renderKTRecordings() {
+  const wrap = document.getElementById('kt-recordings');
+  if (!wrap) return;
+  const recs = S.ktRecordings || [];
+  if (recs.length === 0) {
+    wrap.innerHTML = '<div class="empty-state" style="padding:18px 0;">No recordings yet — add one with the button above.</div>';
+    return;
+  }
+  const sorted = [...recs].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  wrap.innerHTML = `<div class="rec-grid">${sorted.map(r => {
+    const linked = r.ktId ? (S.ktItems || []).find(t => String(t._k) === String(r.ktId)) : null;
+    return `
+      <div class="rec-card">
+        <div class="rec-card-icon">&#9654;</div>
+        <div class="rec-card-body">
+          <div class="rec-card-title">
+            ${r.url
+              ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a>`
+              : esc(r.title)}
+          </div>
+          <div class="rec-card-meta">
+            ${linked ? `<span class="badge b-purple">${esc(linked.id)}</span>` : ''}
+            ${r.date ? `<span>${fmtShort(r.date)}</span>` : ''}
+          </div>
+          ${r.notes ? `<div class="rec-card-notes">${esc(r.notes)}</div>` : ''}
+          <div class="rec-card-foot">
+            ${r.url
+              ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" class="btn-watch">&#9654; Watch Recording</a>`
+              : ''}
+            ${EDIT_MODE
+              ? `<button class="btn btn-danger btn-sm" onclick="deleteRecording(${r._k})" style="margin-left:auto;">&times;</button>`
+              : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+// ── Badges ──
+function typeBadge(type) {
+  const m = { Task:'b-blue', Bug:'b-red', 'User Story':'b-purple', Feature:'b-green', Epic:'b-yellow' };
+  return `<span class="badge ${m[type]||'b-grey'}">${type}</span>`;
+}
+function statusBadge(s) {
+  const m = { 'In Progress':'b-blue', Done:'b-green', 'To Do':'b-yellow', 'In Review':'b-purple', Blocked:'b-red' };
+  return `<span class="badge ${m[s]||'b-grey'}">${s}</span>`;
+}
+function ktStatusBadge(s) {
+  const m = { Pending:'b-yellow', 'In Progress':'b-blue', Completed:'b-green' };
+  return `<span class="badge ${m[s]||'b-grey'}">${s}</span>`;
+}
+
+// ── Header / stats ──
+function renderHeader() {
+  const { pct, daysDone, daysLeft } = progress();
+  const t = todayDate();
+  let status = '';
+  if (t < START)         status = 'Notice period not started';
+  else if (t > END)      status = 'Notice period completed';
+  else if (isWeekend(t)) status = 'Weekend';
+  else if (isEL(t))      status = 'Earned leave';
+  else if (isWFH(t))     status = 'WFH';
+  else                   status = 'In office';
+
+  document.getElementById('hdr-status').textContent = status;
+  document.getElementById('hdr-pct').textContent    = `${pct}% complete · ${daysLeft} days remaining`;
+  document.getElementById('prog-bar').style.width   = `${pct}%`;
+  document.getElementById('prog-pct').textContent   = `${pct}%`;
+  document.getElementById('prog-mid').textContent   = `${daysLeft} days left`;
+  document.getElementById('s-done').textContent     = daysDone;
+  document.getElementById('s-left').textContent     = daysLeft;
+}
+
+function updateTicketStat() {
+  document.getElementById('s-tickets').textContent = S.devopsItems.length + S.ktItems.length;
+}
+
+// ── Escape HTML ──
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Render all ──
+function renderAll() {
+  renderHeader();
+  renderCalendars();
+  renderEL();
+  renderLogs();
+  renderDevops();
+  renderKT();
+  renderKTRecordings();
+}
+
+
+// ── Nav bar ──
+const NAV_SECTIONS = ['sec-log', 'sec-devops', 'sec-kt', 'sec-rec'];
+
+function navTo(secId) {
+  NAV_SECTIONS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === secId) ? '' : 'none';
+  });
+  highlightNav(secId);
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTop = 0;
+}
+
+function highlightNav(secId) {
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sec === secId);
+  });
+}
+
+function updateActiveNav() {}   // not needed with tab panels
+
+function initNavScroll() {
+  navTo('sec-log');             // show Daily Log by default
+}
+
+// ── Azure DevOps config ──
+const ADO_KEY = 'np_ado_config';
+function getADOConfig() {
+  try { const d = localStorage.getItem(ADO_KEY); return d ? JSON.parse(d) : null; } catch(_) { return null; }
+}
+function saveADOSettings() {
+  const org     = document.getElementById('ado-org').value.trim();
+  const project = document.getElementById('ado-project').value.trim();
+  const pat     = document.getElementById('ado-pat').value.trim();
+  const st      = document.getElementById('ado-settings-status');
+  if (!org || !project || !pat) { st.style.color='var(--danger)'; st.textContent='All fields are required.'; return; }
+  localStorage.setItem(ADO_KEY, JSON.stringify({ org, project, pat }));
+  st.style.color = 'var(--success)'; st.textContent = 'Azure DevOps config saved ✓';
+}
+function clearADOSettings() {
+  if (!confirm('Clear Azure DevOps config?')) return;
+  localStorage.removeItem(ADO_KEY);
+  document.getElementById('ado-settings-status').style.color = 'var(--success)';
+  document.getElementById('ado-settings-status').textContent = 'Config cleared.';
+}
+
+// ── Fetch DevOps work item ──
+async function fetchDevopsItem() {
+  const cfg = getADOConfig();
+  if (!cfg || !cfg.org || !cfg.project || !cfg.pat) {
+    alert('Set up Azure DevOps config first — click ⚙ Settings → Azure DevOps Integration.');
+    return;
+  }
+  const numStr = document.getElementById('d-import-id').value.trim();
+  if (!numStr) { alert('Enter a work item number.'); return; }
+  const num = parseInt(numStr, 10);
+  if (isNaN(num) || num < 1) { alert('Enter a valid work item number.'); return; }
+
+  const st = document.getElementById('d-fetch-status');
+  st.style.color = 'var(--warning)'; st.textContent = 'Fetching from Azure DevOps…';
+
+  const url = `https://dev.azure.com/${encodeURIComponent(cfg.org)}/${encodeURIComponent(cfg.project)}/_apis/wit/workitems/${num}?$expand=fields&api-version=7.1-preview.2`;
+  const auth = 'Basic ' + btoa(':' + cfg.pat);
+
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': auth, 'Content-Type': 'application/json' } });
+
+    if (res.status === 401) { st.style.color='var(--danger)'; st.textContent='Unauthorized — check PAT and permissions.'; return; }
+    if (res.status === 404) { st.style.color='var(--danger)'; st.textContent=`Work item #${num} not found in ${cfg.project}.`; return; }
+    if (!res.ok) { st.style.color='var(--danger)'; st.textContent=`HTTP ${res.status} — ${res.statusText}`; return; }
+
+    const data  = await res.json();
+    const f     = data.fields || {};
+
+    const TYPE_MAP  = { 'Task':'Task','Bug':'Bug','User Story':'User Story','Feature':'Feature','Epic':'Epic','Issue':'Task','Test Case':'Task' };
+    const STATE_MAP = { 'Active':'In Progress','In Progress':'In Progress','Resolved':'In Review','Closed':'Done','Done':'Done','New':'To Do','To Do':'To Do','Blocked':'Blocked' };
+
+    const wiTitle = f['System.Title']       || '';
+    const wiType  = TYPE_MAP[f['System.WorkItemType']]  || 'Task';
+    const wiState = STATE_MAP[f['System.State']]        || 'In Progress';
+    const wiUrl   = data._links?.html?.href || `https://dev.azure.com/${cfg.org}/${cfg.project}/_workitems/edit/${num}`;
+    const rawDesc = f['System.Description'] || f['Microsoft.VSTS.Common.AcceptanceCriteria'] || '';
+    const wiDesc  = rawDesc.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+
+    document.getElementById('d-id').value     = `AB#${num}`;
+    document.getElementById('d-title').value  = wiTitle;
+    document.getElementById('d-url').value    = wiUrl;
+    document.getElementById('d-type').value   = wiType;
+    document.getElementById('d-status').value = wiState;
+    document.getElementById('d-notes').value  = wiDesc.slice(0, 800);
+    document.getElementById('d-date').value   = todayKey();
+
+    st.style.color = 'var(--success)';
+    st.textContent = `✓ ${f['System.WorkItemType'] || 'Item'} — ${wiTitle.slice(0,70)}${wiTitle.length > 70 ? '…' : ''}`;
+  } catch(e) {
+    st.style.color = 'var(--danger)';
+    st.textContent = `Network error: ${e.message}`;
+  }
+}
+
+// ── Settings modal ──
+function openSettings() {
+  const cfg = getGHConfig() || {};
+  document.getElementById('gh-owner').value = cfg.owner || 'viveknadig-fws';
+  document.getElementById('gh-repo').value  = cfg.repo  || 'notice-period';
+  document.getElementById('gh-pat').value   = cfg.pat   || '';
+  document.getElementById('settings-status').textContent = '';
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+function handleModalClick(e) {
+  if (e.target === document.getElementById('settings-modal')) closeSettings();
+}
+async function saveSettings() {
+  const owner = document.getElementById('gh-owner').value.trim();
+  const repo  = document.getElementById('gh-repo').value.trim();
+  const pat   = document.getElementById('gh-pat').value.trim();
+  const st    = document.getElementById('settings-status');
+
+  if (!owner || !repo || !pat) { st.style.color = 'var(--danger)'; st.textContent = 'All fields are required.'; return; }
+
+  st.style.color = 'var(--warning)'; st.textContent = 'Testing connection…';
+
+  const headers = { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' };
+
+  try {
+    // Step 1: check the repo exists and PAT has access
+    const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+    if (repoRes.status === 401) {
+      st.style.color = 'var(--danger)';
+      st.textContent = '✗ Invalid PAT — token rejected (401). Create a new one at github.com/settings/tokens.';
+      return;
+    }
+    if (repoRes.status === 404) {
+      st.style.color = 'var(--danger)';
+      st.textContent = `✗ Repo "${owner}/${repo}" not found. Create it at github.com/new then try again.`;
+      return;
+    }
+    if (!repoRes.ok) {
+      st.style.color = 'var(--danger)';
+      st.textContent = `✗ GitHub error ${repoRes.status} — check owner/repo names.`;
+      return;
+    }
+
+    // Step 2: check if data file exists (404 is fine — means first run)
+    const fileRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/data/tracker-data.json`,
+      { headers }
+    );
+    if (fileRes.ok) {
+      st.style.color = 'var(--success)';
+      st.textContent = '✓ Authenticated — existing data found. You can close this.';
+      console.log('%c✓ GitHub authenticated — repo: ' + owner + '/' + repo, 'color:green;font-weight:bold');
+    } else if (fileRes.status === 404) {
+      st.style.color = 'var(--success)';
+      st.textContent = '✓ Authenticated — first save will create the data file. You can close this.';
+      console.log('%c✓ GitHub authenticated — repo: ' + owner + '/' + repo + ' (data file will be created on first save)', 'color:green;font-weight:bold');
+    } else {
+      st.style.color = 'var(--warning)';
+      st.textContent = `Repo OK but file check returned ${fileRes.status} — saving may still work.`;
+    }
+  } catch(e) {
+    st.style.color = 'var(--danger)';
+    st.textContent = `Network error: ${e.message}`;
+    return;
+  }
+
+  localStorage.setItem(GH_KEY, JSON.stringify({ owner, repo, pat }));
+  // Don't auto-close — let the user read the result and close manually
+}
+function clearSettings() {
+  if (!confirm('Clear GitHub sync configuration?')) return;
+  localStorage.removeItem(GH_KEY);
+  document.getElementById('settings-status').style.color = 'var(--success)';
+  document.getElementById('settings-status').textContent = 'Config cleared.';
+}
+
+// ── Init ──
+(async () => {
+  await load();
+  document.getElementById('d-date').value = todayKey();
+  renderAll();
+
+  if (!EDIT_MODE) {
+    // Hide all edit-only controls
+    document.querySelectorAll('.edit-only').forEach(el => el.style.display = 'none');
+    // Show read-only badge in header
+    document.getElementById('ro-badge').style.display = 'inline-flex';
+    // Ensure add forms are closed
+    document.querySelectorAll('.add-form').forEach(el => el.classList.remove('open'));
+  }
+
+  // Auto-open today's log only in edit mode
+  if (EDIT_MODE && isInNotice(todayDate()) && !isWeekend(todayDate())) {
+    selectDate(todayKey());
+  }
+
+  initNavScroll();
+  updateADOBadge();
+})();
+</script>
+<!-- ════ SETTINGS MODAL ════ -->
+<div class="modal-overlay" id="settings-modal" onclick="handleModalClick(event)">
+  <div class="modal-box" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-title">⚙ GitHub Sync Settings</div>
+    <div class="modal-note">
+      Tracker data is saved to <code>data/tracker-data.json</code> in your GitHub repo.<br><br>
+      <strong>For a private repo</strong>, create a <strong>Fine-grained PAT</strong> at
+      <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer">github.com/settings/tokens</a>
+      with these exact settings:<br>
+      &nbsp;• <em>Repository access</em> → <strong>Only select repositories</strong> → pick <code>notice-period</code><br>
+      &nbsp;• <em>Permissions</em> → <strong>Contents → Read and write</strong><br><br>
+      The token is stored <strong>only in your browser</strong> (localStorage) and is never committed to the repo.
+    </div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">GitHub Owner / Username</label>
+        <input type="text" id="gh-owner" placeholder="your-username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Repository Name</label>
+        <input type="text" id="gh-repo" placeholder="notice-period-tracker">
+      </div>
+      <div class="form-group form-full">
+        <label class="form-label">Personal Access Token (PAT)</label>
+        <input type="password" id="gh-pat" placeholder="ghp_..." autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveSettings()">Save &amp; Test</button>
+      <button class="btn btn-ghost"   onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="clearSettings()" style="margin-left:auto;">Clear Config</button>
+    </div>
+    <div id="settings-status" style="font-size:12px;min-height:16px;"></div>
+  </div>
+</div>
+
+</body>
+</html>

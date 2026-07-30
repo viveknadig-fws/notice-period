@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+
+# Local shortcuts (contain file paths)
+open-tracker.bat
+
+# Secrets — never commit these
+.env
+*.secret
