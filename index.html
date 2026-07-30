@@ -61,7 +61,7 @@
   .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
   .header-left p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .header-right   { text-align: right; }
-  .header-right .status  { font-size: 12px; color: var(--muted); }
+  .header-right .status  { font-size: 13px; font-weight: 600; color: var(--text); }
   .header-right .pct     { font-size: 15px; font-weight: 700; color: var(--primary); }
 
   /* ── Nav bar ── */
@@ -1898,7 +1898,18 @@ function renderHeader() {
   else if (isWFH(t))     status = 'WFH';
   else                   status = 'In Office';
 
-  document.getElementById('hdr-status').textContent = status;
+  const STATUS_COLORS = {
+    'In Office':  'var(--success)',
+    'WFH':        'var(--wfh-txt)',
+    'EL':         'var(--el-txt)',
+    'Weekend':    'var(--muted)',
+    'Not started':'var(--muted)',
+    'Completed':  'var(--success)',
+  };
+  const col = STATUS_COLORS[status] || 'var(--text)';
+  const el  = document.getElementById('hdr-status');
+  el.innerHTML = `<span style="color:${col};">&#9679;</span>&nbsp;${status}`;
+  el.style.color = 'var(--text)';
   document.getElementById('hdr-pct').textContent    = `${pct}% complete · ${daysLeft} days remaining`;
   document.getElementById('prog-bar').style.width   = `${pct}%`;
   document.getElementById('prog-pct').textContent   = `${pct}%`;
