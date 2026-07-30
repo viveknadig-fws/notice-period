@@ -685,6 +685,47 @@
     transition: background 0.15s;
   }
   .btn-watch:hover { background: rgba(245,158,11,0.26); text-decoration: none; color: var(--warning); }
+
+  /* ── Markdown toolbar ── */
+  .md-toolbar {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px 7px 0 0;
+    padding: 4px 6px;
+    flex-wrap: wrap;
+    border-bottom: none;
+  }
+  .md-toolbar + textarea,
+  .md-toolbar + .md-preview-wrap textarea {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .md-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 26px;
+    padding: 0 6px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+  }
+  .md-tool-btn:hover { background: var(--border); color: var(--text); }
+  .md-tool-btn strong { font-weight: 800; font-size: 13px; }
+  .md-tool-btn em     { font-style: italic; }
+  .md-tool-btn code   { font-family: monospace; font-size: 11px; }
+  .md-tool-sep { width: 1px; height: 16px; background: var(--border); margin: 0 3px; flex-shrink: 0; }
+  .md-toolbar-active { display: flex !important; }
 </style>
 </head>
 <body>
@@ -823,7 +864,24 @@
               </button>
             </div>
           </div>
-          <textarea id="log-ta" placeholder="Describe your dev work today — tasks, PRs, blockers, progress..." rows="5" disabled></textarea>
+          <!-- Markdown toolbar (shown in edit mode only) -->
+          <div class="md-toolbar" id="md-toolbar">
+            <button class="md-tool-btn" type="button" onclick="insertMd('**','**')" title="Bold"><strong>B</strong></button>
+            <button class="md-tool-btn" type="button" onclick="insertMd('*','*')"   title="Italic"><em>I</em></button>
+            <div class="md-tool-sep"></div>
+            <button class="md-tool-btn" type="button" onclick="insertLineMd('## ')"  title="Heading 2">H2</button>
+            <button class="md-tool-btn" type="button" onclick="insertLineMd('### ')" title="Heading 3">H3</button>
+            <div class="md-tool-sep"></div>
+            <button class="md-tool-btn" type="button" onclick="insertLineMd('- ')"   title="Bullet list">&#8226; List</button>
+            <button class="md-tool-btn" type="button" onclick="insertLineMd('1. ')"  title="Numbered list">1. List</button>
+            <div class="md-tool-sep"></div>
+            <button class="md-tool-btn" type="button" onclick="insertMd('`','`')"    title="Inline code"><code>`code`</code></button>
+            <button class="md-tool-btn" type="button" onclick="insertLineMd('> ')"   title="Blockquote">&ldquo; Quote</button>
+            <button class="md-tool-btn" type="button" onclick="insertMd('[','](url)')" title="Link">&#128279; Link</button>
+            <div class="md-tool-sep"></div>
+            <button class="md-tool-btn" type="button" onclick="insertMd('---\n','')" title="Divider">&mdash;&mdash;</button>
+          </div>
+          <textarea id="log-ta" placeholder="Describe your dev work today — tasks, PRs, blockers, progress..." rows="5" disabled style="border-top-left-radius:0;border-top-right-radius:0;"></textarea>
           <div class="md-preview" id="log-preview"></div>
           <div class="log-editor-actions edit-only" id="log-editor-actions" style="display:none;">
             <button class="btn btn-primary" onclick="saveLog()">Save</button>
@@ -1284,8 +1342,12 @@ function markdownToHtml(md) {
     s = s.replace(/__(.+?)__/g, '<strong>$1</strong>');
     s = s.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
     s = s.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+    // Named markdown links [text](url)
     s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
       (_, t, u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${t}</a>`);
+    // Auto-detect bare URLs not already inside an href
+    s = s.replace(/(?<![=("'`])(https?:\/\/[^\s<>"'`\)\]]+)/g,
+      url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
     return s;
   }
   const lines = md.split('\n');
@@ -1357,6 +1419,38 @@ function buildReadonlyView(entry) {
   return html;
 }
 
+// ── Markdown toolbar helpers ──
+function insertMd(before, after) {
+  const ta = document.getElementById('log-ta');
+  if (!ta || ta.disabled || ta.style.display === 'none') return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e);
+  const inner = sel || (after ? 'text' : '');
+  const inserted = before + inner + after;
+  ta.value = ta.value.slice(0, s) + inserted + ta.value.slice(e);
+  if (sel) {
+    ta.setSelectionRange(s + before.length, s + before.length + sel.length);
+  } else {
+    ta.setSelectionRange(s + before.length, s + before.length + inner.length);
+  }
+  ta.focus();
+  _logDraft[_logTab] = ta.value;
+}
+function insertLineMd(prefix) {
+  const ta = document.getElementById('log-ta');
+  if (!ta || ta.disabled || ta.style.display === 'none') return;
+  const s = ta.selectionStart;
+  const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+  ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+  ta.setSelectionRange(s + prefix.length, s + prefix.length);
+  ta.focus();
+  _logDraft[_logTab] = ta.value;
+}
+function _showToolbar(show) {
+  const tb = document.getElementById('md-toolbar');
+  if (tb) tb.classList.toggle('md-toolbar-active', show);
+}
+
 // ── Log tab switcher ──
 function switchLogTab(tab) {
   // Capture current textarea draft before switching
@@ -1393,10 +1487,12 @@ function toggleLogPreview() {
       '<p style="color:var(--muted);font-style:italic;">Nothing to preview — start typing in the editor.</p>';
     preview.classList.add('visible');
     ta.style.display = 'none';
+    _showToolbar(false);
     btn.textContent = '\u270F Edit';
   } else {
     preview.classList.remove('visible');
     ta.style.display = '';
+    _showToolbar(true);
     btn.textContent = '\uD83D\uDC41 Preview';
     ta.focus();
   }
@@ -1438,6 +1534,7 @@ function selectDate(key) {
     act.style.display   = 'flex';
     del.style.display   = (_logDraft.dev || _logDraft.kt) ? 'inline-flex' : 'none';
     document.getElementById('log-preview-btn').textContent = '\uD83D\uDC41 Preview';
+    _showToolbar(true);
     ta.focus();
   } else {
     // Read-only: render both sections as markdown
@@ -1472,6 +1569,7 @@ function clearLogEditor() {
   ta.style.display = '';
   act.style.display  = 'none';
   tabs.style.display = 'none';
+  _showToolbar(false);
   preview.classList.remove('visible');
   preview.innerHTML  = '';
   renderCalendars();
