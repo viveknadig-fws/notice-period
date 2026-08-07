@@ -27,6 +27,10 @@
     "2026-08-04": {
       "dev": "###  **AOMS PCCD RPA Validation**\n- Validated one loan package (**Package ID: `41723E929AE4`**) as part of the PCCD RPA validation.\n- Reviewed the extraction and field-mapping results in detail.\n- Provided multiple feedback points related to:\n  - Extraction accuracy and missing/incorrect values.\n  - Field mapping issues.\n  - Fuzzy matching behavior and accuracy.\n  - Rules being categorized under incorrect sections.\n  - Rules incorrectly being marked as **Met** or **Unmet**.\n- Shared the identified issues and feedback for further improvements to the process.",
       "kt": ""
+    },
+    "2026-08-05": {
+      "dev": "###  **AOMS PCCD RPA Validation**\n- Validated another loan package (**Package ID: `11A118B09270`**) as part of the PCCD RPA validation.\n- Revalidated the previously identified issues from the earlier package, including:\n  - Extraction and mapping issues.\n  - Fuzzy matching inconsistencies.\n  - Rules being placed in the incorrect sections.\n  - Rules being incorrectly marked as **Met** or **Unmet**.\n- Observed that several of the previously reported issues were still not resolved.\n- Identified additional issues during validation, including:\n  - Incorrect highlighting of extracted/validation results.\n  - Incorrect placement of the **HELOC rule** in the validation output.\n- Documented and provided feedback on both the existing unresolved issues and the newly identified issues.",
+      "kt": ""
     }
   },
   "devopsItems": [],
