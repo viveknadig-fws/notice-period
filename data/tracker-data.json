@@ -19,6 +19,10 @@
     "2026-07-31": {
       "dev": "### ** Encompass RPA Validation**\n- Added 10 additional loans to the validation batch to perform extended testing and verify the RPA workflow across multiple loans.\n- Monitored the RPA execution and validated the results for the additional loans.\n- Since the RPA process required significant execution time for each loan, spent time monitoring and waiting for the complete batch to finish.\n- Reviewed the completed results to ensure the automation was functioning as expected.",
       "kt": ""
+    },
+    "2026-08-03": {
+      "dev": "### ** AOMS PCCD RPA**\n- Conducted a brainstorming and feasibility discussion for automating the **AOMS PCCD process using RPA**.\n- Explored the possibility of decoupling the RPA process for **VDM Loans** to allow it to operate independently.\n- Reviewed the deployment requirements and identified that a **separate VM would be required for deployment**.\n- Based on the additional infrastructure requirement, the decoupling approach was not proceeded with at this stage.",
+      "kt": ""
     }
   },
   "devopsItems": [],
