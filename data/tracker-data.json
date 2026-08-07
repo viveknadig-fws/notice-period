@@ -7,6 +7,10 @@
     "2026-07-27": {
       "dev": "### **Activities**\n- Submitted my resignation through the official process.\n- Had a 1:1 discussion with my manager regarding my resignation.\n- Explained the reasons for my decision and discussed the transition plan.\n- Addressed initial questions related to the resignation and handover process.",
       "kt": ""
+    },
+    "2026-07-29": {
+      "dev": "### **Encompass RPA**\n- Investigated an issue in the Encompass RPA where an unexpected Excel pop-up was interrupting the automation.\n- Identified the root cause of the Excel pop-up and implemented a fix to handle the issue.\n- Tested the RPA after the fix to ensure the Excel-related issue was resolved.",
+      "kt": ""
     }
   },
   "devopsItems": [],
