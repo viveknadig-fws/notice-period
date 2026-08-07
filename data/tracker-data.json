@@ -23,6 +23,10 @@
     "2026-08-03": {
       "dev": "### ** AOMS PCCD RPA**\n- Conducted a brainstorming and feasibility discussion for automating the **AOMS PCCD process using RPA**.\n- Explored the possibility of decoupling the RPA process for **VDM Loans** to allow it to operate independently.\n- Reviewed the deployment requirements and identified that a **separate VM would be required for deployment**.\n- Based on the additional infrastructure requirement, the decoupling approach was not proceeded with at this stage.",
       "kt": ""
+    },
+    "2026-08-04": {
+      "dev": "###  **AOMS PCCD RPA Validation**\n- Validated one loan package (**Package ID: `41723E929AE4`**) as part of the PCCD RPA validation.\n- Reviewed the extraction and field-mapping results in detail.\n- Provided multiple feedback points related to:\n  - Extraction accuracy and missing/incorrect values.\n  - Field mapping issues.\n  - Fuzzy matching behavior and accuracy.\n  - Rules being categorized under incorrect sections.\n  - Rules incorrectly being marked as **Met** or **Unmet**.\n- Shared the identified issues and feedback for further improvements to the process.",
+      "kt": ""
     }
   },
   "devopsItems": [],
