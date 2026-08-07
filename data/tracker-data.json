@@ -35,6 +35,10 @@
     "2026-08-06": {
       "dev": "###  **NH Loan Preclose & Auth**\n- Mapped the **NH Loan Preclose** application to the required custom domain.\n- Based on Sameer's instructions, worked on implementing a basic login flow as an initial approach.\n- Reverted the basic login implementation after identifying that the application needs to be integrated with **SSO** instead Based on Vish's instruction.\n- Reviewed the requirements for the SSO integration and the changes needed for the authentication flow.\n\n###  Development Tools\n- Started using **Claude Code** for development and code assistance.\n- Set up and installed the required dependencies/configuration for Claude Code.\n- Performed initial testing to understand the workflow and validate its usage within the project.",
       "kt": ""
+    },
+    "2026-08-07": {
+      "dev": "### ** SSO Implementation & Testing**\n- Implemented **SSO authentication** for the application.\n- Started testing the SSO flow and validating the authentication behavior.\n- Identified that GitHub write access was required for the implementation/deployment workflow.\n- Raised an access request to obtain the required **GitHub write permissions**.\n\n###  **Custom Domain Mapping**\n- Identified an issue with the **Yudu custom domain** mapping for the NH Loan Preclose QC application.\n- The domain was initially mapped to the **production** environment instead of the required **staging** environment.\n- Coordinated/raised the required changes to have the custom domain mapped to the **staging NH Loan Preclose QC** environment.",
+      "kt": ""
     }
   },
   "devopsItems": [],
