@@ -11,6 +11,10 @@
     "2026-07-29": {
       "dev": "### **Encompass RPA**\n- Investigated an issue in the Encompass RPA where an unexpected Excel pop-up was interrupting the automation.\n- Identified the root cause of the Excel pop-up and implemented a fix to handle the issue.\n- Tested the RPA after the fix to ensure the Excel-related issue was resolved.",
       "kt": ""
+    },
+    "2026-07-30": {
+      "dev": "### ** Encompass RPA**\n- Investigated an issue where the Encompass App Launcher was loading successfully, but the Encompass application itself was not launching.\n- Performed troubleshooting and identified the root cause of the issue.\n- Fixed the underlying issue and restarted the Encompass application, which resolved the problem.\n- Implemented an additional fix/preventive handling to ensure the same issue does not occur again during future RPA executions.\n- Verified the application after the changes to ensure the RPA could continue as expected.",
+      "kt": ""
     }
   },
   "devopsItems": [],
