@@ -39,6 +39,10 @@
     "2026-08-07": {
       "dev": "### ** SSO Implementation & Testing**\n- Implemented **SSO authentication** for the application.\n- Started testing the SSO flow and validating the authentication behavior.\n- Identified that GitHub write access was required for the implementation/deployment workflow.\n- Raised an access request to obtain the required **GitHub write permissions**.\n\n###  **Custom Domain Mapping**\n- Identified an issue with the **Yudu custom domain** mapping for the NH Loan Preclose QC application.\n- The domain was initially mapped to the **production** environment instead of the required **staging** environment.\n- Coordinated/raised the required changes to have the custom domain mapped to the **staging NH Loan Preclose QC** environment.",
       "kt": ""
+    },
+    "2026-08-10": {
+      "dev": "###  **SSO & Deployment**\n- Created a new branch and raised a separate PR for the **SSO implementation**.\n- The PR was reviewed and merged, but the deployment failed due to an issue in the **YAML configuration file**.\n- Investigated the deployment failure and identified the YAML configuration issue.\n- For the client demo, reimplemented the authentication flow using **hardcoded values** as a temporary demonstration setup.\n- Coordinated with **Rithesh** during the implementation and testing of the demo authentication flow.",
+      "kt": ""
     }
   },
   "devopsItems": [],
