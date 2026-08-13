@@ -41,7 +41,7 @@
       "kt": ""
     },
     "2026-08-11": {
-      "dev": "###  **SSO & Deployment**\n- Created a new branch and raised a separate PR for the **SSO implementation**.\n- The PR was reviewed and merged, but the deployment failed due to an issue in the **YAML configuration file**.\n- Investigated the deployment failure and identified the YAML configuration issue.\n- For the client demo, reimplemented the authentication flow using **hardcoded values** as a temporary demonstration setup.\n- Coordinated with **Rithesh** during the implementation and testing of the demo authentication flow.",
+      "dev": "###  **SSO & CI/CD**\n- Had a problem with CI/CD \n- Fixed Yaml file for deployement",
       "kt": ""
     },
     "2026-08-10": {
