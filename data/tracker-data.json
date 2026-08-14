@@ -47,6 +47,10 @@
     "2026-08-10": {
       "dev": "###  **SSO & Deployment**\n- Created a new branch and raised a separate PR for the **SSO implementation**.\n- The PR was reviewed and merged, but the deployment failed due to an issue in the **YAML configuration file**.\n- Investigated the deployment failure and identified the YAML configuration issue.\n- For the client demo, reimplemented the authentication flow using **hardcoded values** as a temporary demonstration setup.\n- Coordinated with **Karthikeyan** during the implementation and testing of the demo authentication flow.",
       "kt": ""
+    },
+    "2026-08-12": {
+      "dev": "###  **AOMS Encompass RPA – Weekly Objectives**\n\nReceived two key objectives to be completed as part of the week's AOMS Encompass RPA work:\n\n1. **Credential-Based RPA Execution**\n   - Enhance the Encompass RPA workflow to provide an option for the **Operations team to enter their Encompass credentials**.\n   - Use the provided credentials to initiate and progress the RPA workflow.\n\n2. **Multiple Loan Automation**\n   - Enable the RPA to process **multiple loans based on input provided by the Operations team**.\n   - Support importing a list of loans, such as an Excel file containing the required loan numbers.\n   - Process the imported loans sequentially through the automation.\n   - Explore the possibility of automatically running the **checklist validation** for each loan as part of the workflow.",
+      "kt": ""
     }
   },
   "devopsItems": [],
