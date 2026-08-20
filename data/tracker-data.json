@@ -71,6 +71,10 @@
     "2026-08-19": {
       "dev": "### ** Cost Management Dashboard**\n\n- Completed the **Conversation Log API integration** and related UI implementation.\n- Received a new requirement to create a **Cost Management Dashboard** to track and monitor API/AI-related costs.\n- Retrieved the available **API cost report** and prepared the data for integration into the dashboard.\n- Identified and captured **AI-related costs from OpenAI API calls**.\n- Investigated and captured the **AI costs from the Docsilla API** as well.\n- Implemented cost tracking at the **loan level** and stored the cost details in JSON format for each loan.\n- Stored the cost information along with the loan data so that the cost history remains available even if the corresponding loan is deleted later.\n- Completed the required changes and **deployed the cost tracking functionality**.",
       "kt": ""
+    },
+    "2026-08-20": {
+      "dev": "###  **Encompass RPA**\n- Investigated an issue where the Encompass RPA was **not extracting the required loan details correctly**.\n- Identified the cause of the extraction issue and implemented the required fix.\n- Tested the updated extraction flow to verify that the correct details were being captured.\n\n### Multi-Loan Functionality\n- Conducted a **demo of the multi-loan functionality** implemented in the Encompass RPA.\n- Demonstrated the workflow for processing multiple loans through the automation.\n\n### Cost Management Dashboard\n- Received comments and feedback on the **Cost Management Dashboard / Cost Report**.\n- Reviewed the feedback and identified the required changes and improvements for the dashboard.",
+      "kt": ""
     }
   },
   "devopsItems": [],
