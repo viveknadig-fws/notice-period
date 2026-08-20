@@ -67,6 +67,10 @@
     "2026-08-18": {
       "dev": "### ** AOMS Encompass RPA – Multi-Loan Functionality\n**\n- Completed the **multi-loan functionality** for the Encompass RPA.\n- Deployed the completed functionality to the **VM** and performed initial validation.\n\n### Encompass Conversation Log API\n\n- Received a requirement to investigate whether the **Conversation Log API** could be used for the cover letter generation process.\n- Researched and tested the API to verify whether the required loan data could be retrieved through it.\n- After confirming that the API could be used for the requirement, started integrating it into the application.\n- Began implementing the functionality in the **UI** to fetch and populate the required data through the API while generating the cover letter.",
       "kt": ""
+    },
+    "2026-08-19": {
+      "dev": "### ** Cost Management Dashboard**\n\n- Completed the **Conversation Log API integration** and related UI implementation.\n- Received a new requirement to create a **Cost Management Dashboard** to track and monitor API/AI-related costs.\n- Retrieved the available **API cost report** and prepared the data for integration into the dashboard.\n- Identified and captured **AI-related costs from OpenAI API calls**.\n- Investigated and captured the **AI costs from the Docsilla API** as well.\n- Implemented cost tracking at the **loan level** and stored the cost details in JSON format for each loan.\n- Stored the cost information along with the loan data so that the cost history remains available even if the corresponding loan is deleted later.\n- Completed the required changes and **deployed the cost tracking functionality**.",
+      "kt": ""
     }
   },
   "devopsItems": [],
