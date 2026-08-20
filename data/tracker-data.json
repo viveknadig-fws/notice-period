@@ -63,6 +63,10 @@
     "2026-08-17": {
       "dev": "###  **AOMS Encompass RPA – Multi-Loan Functionality**\n\n- Continued working on the **multi-loan functionality** for the Encompass RPA.\n- Worked on processing multiple loans based on the loan details provided by the Operations team.\n\n### Mutual Mortgage – Cover Letter Enhancement\n\n- Received an additional requirement from **Sameer** to enhance the Mutual Mortgage cover letter generation.\n- Requirement was to add a **second page** to the generated cover letter.\n- The second page needs to be downloaded from the **eFolder of the loan** provided through the search box.\n- Started working on the approach to retrieve the required document from the loan's eFolder and append it as the second page of the cover letter.",
       "kt": ""
+    },
+    "2026-08-18": {
+      "dev": "### ** AOMS Encompass RPA – Multi-Loan Functionality\n**\n- Completed the **multi-loan functionality** for the Encompass RPA.\n- Deployed the completed functionality to the **VM** and performed initial validation.\n\n### Encompass Conversation Log API\n\n- Received a requirement to investigate whether the **Conversation Log API** could be used for the cover letter generation process.\n- Researched and tested the API to verify whether the required loan data could be retrieved through it.\n- After confirming that the API could be used for the requirement, started integrating it into the application.\n- Began implementing the functionality in the **UI** to fetch and populate the required data through the API while generating the cover letter.",
+      "kt": ""
     }
   },
   "devopsItems": [],
