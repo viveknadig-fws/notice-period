@@ -75,6 +75,10 @@
     "2026-08-20": {
       "dev": "###  **Encompass RPA**\n- Investigated an issue where the Encompass RPA was **not extracting the required loan details correctly**.\n- Identified the cause of the extraction issue and implemented the required fix.\n- Tested the updated extraction flow to verify that the correct details were being captured.\n\n### Multi-Loan Functionality\n- Conducted a **demo of the multi-loan functionality** implemented in the Encompass RPA.\n- Demonstrated the workflow for processing multiple loans through the automation.\n\n### Cost Management Dashboard\n- Received comments and feedback on the **Cost Management Dashboard / Cost Report**.\n- Reviewed the feedback and identified the required changes and improvements for the dashboard.",
       "kt": ""
+    },
+    "2026-08-21": {
+      "dev": "###  **Cost Management Dashboard**\n\n- Raised a **PR for the feedback and improvements** made to the Cost Report Dashboard.\n- During the PR process, encountered a few **merge conflicts** due to changes in the branch.\n- Resolved the merge conflicts and verified the updated changes.\n- Completed the PR process and deployed the latest changes to the **staging environment**.\n- Verified that the updated Cost Report Dashboard is **live and accessible in staging** for further validation.",
+      "kt": ""
     }
   },
   "devopsItems": [],
