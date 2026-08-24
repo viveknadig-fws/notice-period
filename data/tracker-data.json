@@ -81,7 +81,18 @@
       "kt": ""
     }
   },
-  "devopsItems": [],
+  "devopsItems": [
+    {
+      "_k": 1787565922845,
+      "id": "10622",
+      "title": "KT - TM webapp",
+      "url": "https://dev.azure.com/FlatworldAi/FAIA/_workitems/edit/10622",
+      "type": "Task",
+      "status": "In Progress",
+      "date": "2026-08-24",
+      "notes": ""
+    }
+  ],
   "ktItems": [],
   "ktRecordings": []
 }
