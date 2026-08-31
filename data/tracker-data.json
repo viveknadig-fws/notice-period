@@ -99,6 +99,10 @@
     "2026-08-28": {
       "dev": "###  **Yudu – Encompass Integration**\n\n- Completed the implementation and configuration of **Encompass Custom Tools and Custom Forms**.\n- Successfully completed the requirement to launch **Yudu in an in-browser experience within Encompass**.\n- Implemented an additional option to launch **Yudu in an external browser**, passing the **Loan Number as a parameter** to load the relevant loan context.\n- Validated both approaches and confirmed that the required loan information could be passed successfully.\n- Demonstrated the completed functionality to **Vish** for review and confirmation.\n- Recorded the demonstration session so that it can be used as a reference during the upcoming **client onboarding**.\n- Completed the overall **Yudu–Encompass integration requirement** and prepared the functionality for client onboarding.",
       "kt": ""
+    },
+    "2026-08-31": {
+      "dev": "###  **KT Documentation & Transition Planning**\n\n- Continued creating and organizing **KT documentation** to support the handover and transition process.\n- Documented the key application details, workflows, and technical information required for the team to take over the work.\n- Started applying for the planned **leaves** during the notice period.\n- Coordinated the leave planning in advance to ensure the remaining KT, handover, and transition activities could be completed smoothly.\n- Focused on preparing the required documentation and planning ahead to ensure a **smooth transition and handover** before the end of the notice period.",
+      "kt": ""
     }
   },
   "devopsItems": [
