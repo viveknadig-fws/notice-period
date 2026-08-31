@@ -95,6 +95,10 @@
     "2026-08-27": {
       "dev": "###  **Mutual Mortgage – Cover Letter Enhancement**\n\n- Reworked the **cover letter generation page** to accept the **Loan Number as a parameter**.\n- Updated the implementation to support launching the cover letter functionality in a **browser-style experience within Encompass**.\n- Successfully configured and added the application as a **Custom Tool inside the Encompass web browser**.\n- Validated the setup and confirmed that the cover letter page could be launched through the Encompass Custom Tool with the required loan information.\n- Completed the initial **Yudu–Encompass browser integration** requirement.",
       "kt": ""
+    },
+    "2026-08-28": {
+      "dev": "###  **Yudu – Encompass Integration**\n\n- Completed the implementation and configuration of **Encompass Custom Tools and Custom Forms**.\n- Successfully completed the requirement to launch **Yudu in an in-browser experience within Encompass**.\n- Implemented an additional option to launch **Yudu in an external browser**, passing the **Loan Number as a parameter** to load the relevant loan context.\n- Validated both approaches and confirmed that the required loan information could be passed successfully.\n- Demonstrated the completed functionality to **Vish** for review and confirmation.\n- Recorded the demonstration session so that it can be used as a reference during the upcoming **client onboarding**.\n- Completed the overall **Yudu–Encompass integration requirement** and prepared the functionality for client onboarding.",
+      "kt": ""
     }
   },
   "devopsItems": [
