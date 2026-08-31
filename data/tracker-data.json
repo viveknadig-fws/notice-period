@@ -79,6 +79,10 @@
     "2026-08-21": {
       "dev": "###  **Cost Management Dashboard**\n\n- Raised a **PR for the feedback and improvements** made to the Cost Report Dashboard.\n- During the PR process, encountered a few **merge conflicts** due to changes in the branch.\n- Resolved the merge conflicts and verified the updated changes.\n- Completed the PR process and deployed the latest changes to the **staging environment**.\n- Verified that the updated Cost Report Dashboard is **live and accessible in staging** for further validation.",
       "kt": ""
+    },
+    "2026-08-24": {
+      "dev": "### ** Yudu – In-Browser Encompass Integration**\n\n- Received a new requirement to explore the possibility of launching **Yudu within the Encompass application**, providing an in-browser experience for users.\n- Discussed and explored the requirement with **Sameer, Santhosh, and Prakhyath** to understand the available options and technical feasibility.\n- Investigated how Yudu could be integrated or launched within Encompass and what Encompass capabilities could support this requirement.\n- Obtained **Super Admin credentials for EMM UAT** to perform further exploration and testing.\n- Planned to use the EMM UAT environment to validate the available options and determine the most suitable approach for the integration.",
+      "kt": ""
     }
   },
   "devopsItems": [
