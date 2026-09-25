@@ -103,6 +103,10 @@
     "2026-08-31": {
       "dev": "###  **KT Documentation & Transition Planning**\n\n- Continued creating and organizing **KT documentation** to support the handover and transition process.\n- Documented the key application details, workflows, and technical information required for the team to take over the work.\n- Started applying for the planned **leaves** during the notice period.\n- Coordinated the leave planning in advance to ensure the remaining KT, handover, and transition activities could be completed smoothly.\n- Focused on preparing the required documentation and planning ahead to ensure a **smooth transition and handover** before the end of the notice period.",
       "kt": ""
+    },
+    "2026-09-04": {
+      "dev": "## Friday\n### TJX Illegal Tool – Knowledge Transfer\n\n- Started the **KT session for the TJX Illegal Tool**.\n- Covered the overall functionality, workflow, and important implementation details of the tool.\n- Completed the KT and handed over the relevant information and knowledge required for future maintenance and support.\n- **Prakhyath** participated in the KT session and received the complete handover.\n- Ensured that all required details were explained and handed over smoothly.\n\n**DevOps Ticket:** [10876](https://dev.azure.com/FlatworldAi/FAIA/_workitems/edit/10876)",
+      "kt": "###  TJX Illegal Tool – Knowledge Transfer\n\n- Started the **KT session for the TJX Illegal Tool**.\n- Covered the overall functionality, workflow, and important implementation details of the tool.\n- Completed the KT and handed over the relevant information and knowledge required for future maintenance and support.\n- **Prakhyath** participated in the KT session and received the complete handover.\n- Ensured that all required details were explained and handed over smoothly.\n\n**DevOps Ticket:** [10876](https://dev.azure.com/FlatworldAi/FAIA/_workitems/edit/10876)"
     }
   },
   "devopsItems": [
